@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance FAQ Chatbot</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+        }
+
+        .chatbot-icon {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #0b0c14;
+            color: white;
+            padding: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 28px;
+            z-index: 1000;
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 90px;
+            right: 25px;
+            width: 350px;
+            max-height: 500px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            background-color: #000000;
+            color: white;
+            padding: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            background-color: #f9f9f9;
+        }
+
+        .chatbot-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-top: 1px solid #ddd;
+            font-size: 16px;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-sizing: border-box;
+        }
+
+        .chatbot-message, .chatbot-response {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            max-width: 70%;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .chatbot-message {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+            text-align: left;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .chatbot-response {
+            background-color: #000000;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+
+        .chatbot-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chatbot-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-icon" onclick="toggleChatbot()">💬</div>
+    
+    <div id="chatbot-container" class="chatbot-container">
+        <div class="chatbot-header">
+            <h2>Insurance FAQ</h2>
+            <button onclick="toggleChatbot()">✖</button>
+        </div>
+        <div class="chatbot-body" id="chatbot-body">
+            <div class="chatbot-message">Hello! How can I assist you today?</div>
+        </div>
+        <input type="text" id="user-input" class="chatbot-input" placeholder="Ask a question..." onkeypress="handleKeyPress(event)">
+    </div>
+
+    <script>
+        const faq = [
+            
+        {
+    question: "how do i file a vehicle insurance claim",
+    answer: "You can file a claim by providing details of the incident, uploading required documents, and following the prompts in the application."
+},
+{
+    question: "what types of damages are covered under my vehicle insurance policy",
+    answer: "Coverage typically includes damages from accidents, theft, fire, natural disasters, and vandalism. Check your policy for specific details."
+},
+{
+    question: "What is the Insured Declared Value (IDV) and how does it affect my claim?",
+    answer: "The IDV is the maximum amount you can claim in case of total loss or theft of your vehicle. It decreases with the vehicle's age.",
+    
+},
+{
+    question: "Do I need to report a minor accident if I don’t plan to file a claim?",
+    answer: "It’s advisable to report all accidents, even minor ones, as it could affect future claims or policy renewals."
+},
+{
+    question: "Can I claim for damage caused by someone else?",
+    answer: "Yes, if another party is responsible, you can claim against their insurance, or your insurer may pursue recovery on your behalf."
+}, {
+    question: "What is the process for claiming total loss or theft of my vehicle?",
+    answer: "In case of total loss or theft, you’ll need to provide a police report, the vehicle’s RC (Registration Certificate), and other documents as required by your insurer."
+}, {
+    question: "Will my premium increase after filing a vehicle insurance claim",
+    answer: "Filing a claim can affect your premium at renewal, depending on the claim type and your policy terms."
+}, {
+    question: "How long does it take to process a vehicle insurance claim?",
+    answer: "Claims are typically processed within 7-10 business days after all required documentation is submitted."
+}, {
+    question: "What is a deductible, and how does it affect my vehicle insurance claim?",
+    answer: " A deductible is the amount you pay out of pocket before your insurance coverage kicks in. It’s deducted from the total claim amount."
+}, {
+    question: "Can I choose any garage for repairs, or do I need to use a network garage?",
+    answer: "You can choose any garage, but using a network garage may provide benefits like cashless repairs and faster claim processing."
+}, {
+    question: "What happens if I disagree with the damage assessment or claim amount?",
+    answer: " If you disagree with the assessment, you can request a re-evaluation or a manual review by the insurance company."
+}, {
+    question: "How do I track the status of my vehicle insurance claim?",
+    answer: " You can track the status of your claim through the application, where you’ll receive real-time updates."
+},
+{
+    question: " What Motor Insurance cover should I buy? Should I buy Comprehensive Insurance or Liability only Policy?",
+    answer: " Third Party Liability insurance is mandatory for all vehicles plying on public roads in India. This covers Liability for injuries and damages to others that you are responsible for. In addition, it is prudent to cover loss or damages to the vehicle itself by way of a Comprehensive/Package policy or a Bundled Policy or a Standalone Own Damage Policy in addition to your Liability Only Policy, which covers both Liability as well as Own damage to Insured vehicle. Liability Only cover is also known as Act Only cover."
+},
+{
+    question: "What coverage limits meet my needs?",
+    answer: "  For Own Damage, the Sum Insured for the vehicle is called ‘Insured Declared Value’ and should reflect the current market value of the vehicle. For Third Party Liability cover, there is unlimited coverage for death/injuries to Third Parties, however, Third party property damages are covered up to a sum of Rs.750,000. Insured has option to restrict coverage for Third Party Property damage to Rs.6,000 whereby there will be reduction in Liability Only premium."
+}, {
+    question: "Which policy should I purchase for my new Private Car or new Two-Wheeler?",
+    answer: " You can either purchase Bundled Policy or Long-Term Liability Only Policy for term of 3 year and 5 year for new Private Car and new Two-Wheeler respectively. However, annual Package or annual Liability only policy for new Private Car or New Two Wheeler is not available as it is not permitted."
+}, {
+    question: "When should I renew the Bundled Policy?",
+    answer: "  Own-Damage (OD) cover under Bundled Policy is valid for period of one year and hence, OD section should be renewed on expiry of one-year period. However, Third Party cover under the Bundled Policy is valid for three years (for new Private Cars) or five years (for new Two-wheelers) and hence, it should be renewed on expiry of 3 or 5 year period as the case may be."
+}, {
+    question: "When should I approach Insurance company for renewal of my policy?",
+    answer: " You should approach Insurance company at least 15 days before expiry of your existing policy period."
+}, {
+    question: " What is Add-on Cover?",
+    answer: "Add-on cover extends the cover under the base policy on payment of additional premium. Different Insurers have different Add-ons available with them. Nil Depreciation Cover, Return to Invoice Cover, No Claim Bonus Protection are some of the most common Add-on covers present in the market. You can visit the IRDAI website (irdai.gov.in) for detailed coverage of under these add-ons."
+}, {
+    question: "What is No Claim Bonus?",
+    answer: "No Claim Bonus (NCB) is the benefit accrued to an insured for NIL claims during the previous policy period. As per current norms prevalent, it ranges from 20% on the Own Damage premium (and not on Liability premium) and progressively increases to a maximum of 50% based on successive claim free years. If; however, a claim is lodged, the No claim Bonus is lost in the subsequent policy period. NCB is given to insured and not to the insured vehicle. Hence, on transfer of the vehicle, the insurance policy can be transferred to new owner but not the NCB. The new owner has to pay the difference on account of NCB for the balance policy period. The original owner can, however, use the NCB on a new vehicle purchased by him."
+}, {
+    question: "Will my No Claim Bonus (NCB) get ported if I want to change my insurance company?",
+    answer: "Yes, you can avail of the NCB facility if you change the insurer on renewal. You would have to produce proof of the NCB earned by way of renewal notice from the current insurer. If the same cannot be produced, you may produce your original expiring policy along with a certification that no claim has been lodged by yourself on the expiring policy. Hence, evidence can be in form of a renewal notice or a letter confirming the NCB entitlement from the previous insurer."
+}, {
+    question: "Is GST applicable and how much is it?",
+    answer: "Yes, GST is applicable and would be as per prevailing rule of law. "
+}, {
+    question: " What are the documents to be kept in the vehicle while plying in public places?",
+    answer: " Certificate of Insurance, Xerox copy of Registration Certificate, Pollution under control Certificate (PUC), Copy of DL of person who drives the vehicle"
+}, {
+    question: " I have lost the insurance policy. Can I get a duplicate one?",
+    answer: "Yes, please approach the same office, which had issued the policy, with a written request. A nominal fee is charged for issuing duplicate policy copy."
+}, {
+    question: "Is PUC Certificate mandatory for renewing the Motor Insurance policy?",
+    answer: "Yes it is mandatory to have a valid PUC Certificate on the date of renewal of the insurance policy."
+},
+
+
+
+{
+    question: "how do i file a property insurance claim",
+    answer: "To file a claim, provide details about the damage, upload necessary documents, and follow the guided steps in the application."
+},
+{
+    question: "what types of damages are covered under my property insurance policy",
+    answer: "Coverage typically includes damages from fire, theft, natural disasters, water damage, and vandalism. Refer to your policy for specific coverage."
+},
+{
+    question: "What is the process for claiming loss due to a natural disaster?",
+    answer: "You’ll need to provide evidence of the damage, such as photos or videos, and may need a government declaration of the disaster for the claim."
+}, {
+    question: "Can I claim for partial damage to my property?",
+    answer: "Yes, you can file a claim for both partial and total damage, depending on the extent and type of damage."
+}, {
+    question: "What is the deductible in property insurance, and how does it affect my claim?",
+    answer: "The deductible is the amount you must pay before your insurance covers the rest. It’s subtracted from the total claim amount."
+}, 
+{
+    question: "How long does it take to process a property insurance claim?",
+    answer: "Property claims are usually processed within 10-15 business days after submitting all required documents."
+},  {
+    question: "What documents are needed to file a property insurance claim?",
+    answer: " You may need to provide your policy details, photos of the damage, repair estimates, and in some cases, a police report."
+},  {
+    question: "Will my premium increase after filing a property insurance claim?",
+    answer: "Filing a claim can impact your premium at renewal, depending on the claim type and your policy terms."
+},  {
+    question: "Can I use any contractor for repairs, or do I need to use a preferred vendor?",
+    answer: "You can choose any contractor, but using a preferred vendor may offer benefits like quicker claim processing and quality assurance."
+},  {
+    question: "What should I do if my claim is denied?",
+    answer: "If your claim is denied, you can appeal the decision by providing additional information or requesting a review by the insurance company."
+},  {
+    question: "How do I know if my property is fully covered?",
+    answer: "Review your policy’s sum insured and coverage details. You may need to adjust your coverage based on the current value of your property."
+},  {
+    question: "*Can I track the status of my property insurance claim?",
+    answer: "es, you can monitor the progress of your claim through the application, with regular updates provided."
+}, 
+{
+    question: "What are the requirements to purchase a property insurance policy?",
+    answer: "The proposer of the policy should first and foremost have an interest in the assets being proposed for insurance, i.e. he/she should stand to lose financially in the event of loss or damage to such assets. Secondly, the proposer should submit a proposal form (which can be obtained at any insurer’s website or office). The proposal form should disclose all details, which are true to the insured’s best knowledge and other information, which the proposer may feel is relevant."
+}, {
+    question: "What are the different types of Property Insurance Policies?",
+    answer: "Bharat Griha Raksha, Bharat Sookshma Udyam Suraksha, Bharat Laghu Udyam Suraksha and Standard Fire & Special Perils Policy provides cover for properties against fire and allied perils such as flood, riots, lightening, impact damage etc. Further, loss or damage to assets due to burglary and theft can be covered under a Burglary & House Breaking Insurance Policy. Valuables can be covered under All Risks Policies and there are package policies for house owners and shopkeepers."
+}, {
+    question: "What will be the cost of a fire insurance policy?",
+    answer: "  The cost of a fire insurance policy or the Premium can depend on the • Perils to be covered • The value of the items covered • The usage of the premises proposed for insurance • The location details of the premises proposed for insurance etc. • The construction of building and occupancy Consequent to de-tariffing of the non-life insurance segment (except Motor Third Party Insurance where premium rates laid down by IRDA), premium rates charged by each insurer may differ. However, they should have been filed with the IRDA under File & Use procedure."
+}, {
+    question: "Why should I insure my Building? Fire can't possibly do any harm to the building.",
+    answer: "Fire and other perils (normally covered under a fire insurance policy) can cause loss / damage to buildings. There have been fire accidents that have completely destroyed multi-storey buildings. Floods can also bring about devastating losses. Similarly, Riots and Acts of Terrorism can also produce huge losses to human lives as well as property."
+}, {
+    question: "Can I ask for cancellation of policy mid-term? Will I get any premium refund?",
+    answer: "Yes, At Insured's option: Retention of premium on short period scale and balance if any, will be refunded. At Insurer's option: Pro-rata refund of premium will be given."
+}, {
+    question: "Can items like jewellery, ornaments and art works be covered by the general fire insurance policy?",
+    answer: " Unless prior consent has been given by the Insurer, general fire insurance policy does not cover items like jewellery ornaments, art works, scripts, documentary information, computer system information, shares and stocks, cash. These can be covered on specific request and subject to valuation where necessary."
+}, {
+    question: "Who has to arrange for Marine Cargo insurance-the buyer or the seller? Or do both need some protection?",
+    answer: "This depends on the Sale Contract the two enter into. For each Sale Term such as Free on Board (FOB), Cost and Freight (C&F), Cost Insurance and Freight (CIF) etc, the responsibility for arranging for insurance varies."
+}, {
+    question: "I need to cover my jewellery. What policy should I take?",
+    answer: " Insurers offer ‘All Risks’ policy for covering jewellery. You must ensure that your jewellery is valued correctly and you are able to show proof of valuation should a claim occur. An All Risks policy also has exclusions, so go through the terms and conditions thoroughly."
+}, {
+    question:  "Why buy Property Insurance?",
+    answer: "If you are an SME, an entrepreneur or having any small or medium enterprise, you could look for a package policy that offers coverage against all your insurance requirements. It can also provide coverage under Workmen’s Compensation Act including coverage of accident and health insurance, fidelity guarantee, public liability, Money in transit insurance etc."
+}, {
+    question: "What is condition of Average?",
+    answer: "In case of insuring the property for a value less the actual value, then, in the event of claim, the losses are also to be shared to that extent of underinsurance proportionately."
+},
+{
+    question: " What is a deductible?",
+    answer: " A deductible (also called excess in some policies) is that portion of claim which is not covered by the insurer. In simple terms, deductible or excess is the amount of loss which you have to bear yourself, before your insurer steps in for covering the losses under insurance policy."
+},
+        ];
+
+        function toggleChatbot() {
+            const chatbotContainer = document.getElementById('chatbot-container');
+            chatbotContainer.style.display = chatbotContainer.style.display === 'none' || chatbotContainer.style.display === '' ? 'flex' : 'none';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                const userInput = document.getElementById('user-input').value.trim();
+                if (userInput) {
+                    addMessage(userInput, 'user');
+                    getResponse(userInput);
+                    document.getElementById('user-input').value = '';
+                }
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'user' ? 'chatbot-response' : 'chatbot-message';
+            messageDiv.textContent = text;
+            document.getElementById('chatbot-body').appendChild(messageDiv);
+            document.getElementById('chatbot-body').scrollTop = document.getElementById('chatbot-body').scrollHeight;
+        }
+
+        function getResponse(userInput) {
+            const lowerInput = userInput.toLowerCase();
+            const response = faq.find(f => lowerInput.includes(f.question.toLowerCase()));
+            const answer = response ? response.answer : "Sorry, I didn't understand that. Could you please rephrase?";
+            addMessage(answer, 'bot');
+        }
+    </script>
+</body>
+</html>
